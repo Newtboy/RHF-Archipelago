@@ -112,10 +112,7 @@ class RHFClient(CommonClient.CommonContext):
 		if (item[0:5] == "Album"): # {
 			# We can assume that we aren't using levelsanity as the Album item should not be made with it on
 			self.memory_editor.unlockAlbum(item[-2:].strip())
-		levels = []
-		for remix in worlds.rhythm_heaven_fever.levels_dict["core"]:
-			levels.extend(worlds.rhythm_heaven_fever.levels_dict["core"][remix])
-		elif item ==
+
 
 	# Location detection methods go here.
 	# Item application methods go here.

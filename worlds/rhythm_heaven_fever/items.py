@@ -43,10 +43,8 @@ def create_items(world: RhythmHeavenFeverWorld):
                 continue
             create_single(f"Album {album_index + 1}", world, ItemClassification.progression)
     else:
-        for remix in levels_dict["core"]: # {
-            create_single(remix, world, ItemClassification.progression)
-            for remixLevel in levels_dict["core"][remix]: # {
-                create_single(remixLevel, world, ItemClassification.progression)
+        for levelName in levels: # {
+            create_single(f"{levelName} Unlock", world, ItemClassification.progression)
 
 
     if world.options.include_endless.value:

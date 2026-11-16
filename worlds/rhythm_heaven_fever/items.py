@@ -1,107 +1,156 @@
+
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, Optional, TYPE_CHECKING
-from worlds.rhythm_heaven_fever import *
-from .data import levels_dict
-from typing import Dict, Optional
-from BaseClasses import Item, ItemClassification, MultiWorld, Location
-from .data import *
+from typing import TYPE_CHECKING
+
+from BaseClasses import Item, ItemClassification
+
+from .data import levels, levels_dict, BOOK, MUSIC
 
 if TYPE_CHECKING:
     from . import RhythmHeavenFeverWorld
 
 
+GAME_NAME = "Rhythm Heaven Fever"
+BASE_ID = 0x52484600
+
+
 class RhythmHeavenFeverItem(Item):
-    game: str = "Rhythm Heaven Fever"
-
-
-def get_random_item_names(rand, k: int, weights: dict[str, int]) -> list[str]:
-    random_items = rand.choices(
-        list(weights.keys()),
-        weights=list(weights.values()),
-        k=k)
-    return random_items
-
-
-def create_single(name: str, world: RhythmHeavenFeverWorld, item_class: ItemClassification = None) -> None:
-    classification = rhythm_heaven_fever_item_table[name].classification if item_class is None else item_class
-    world.item_pool.append(RhythmHeavenFeverItem(name, classification, rhythm_heaven_fever_item_table[name].code, world.player))
-
-
-def create_multiple(name: str, amount: int, world: RhythmHeavenFeverWorld, item_class: ItemClassification = None):
-    for i in range(amount):
-        create_single(name, world, item_class)
-
-
-def create_items(world: RhythmHeavenFeverWorld):
-    total_location_count: int = len(world.multiworld.get_unfilled_locations(world.player))
-
-    if (not world.options.levelsanity.value): # {
-        for album_index in range(world.options.remix_count):
-            if album_index == 0:
-                continue
-            create_single(f"Album {album_index + 1}", world, ItemClassification.progression)
-    else:
-        for levelName in levels: # {
-            create_single(f"{levelName} Unlock", world, ItemClassification.progression)
-
-
-    if world.options.include_endless.value:
-        for endless_game in levels_dict["endless"]:
-            create_single(f"Endless Game - {endless_game}", world)
-
-    for extra_game in levels_dict["extra"]:
-        create_single(f"Extra Game - {extra_game}", world)
-
-    for toy in levels_dict["toys"]:
-        create_single(f"{toy} Toy", world)
-
-    # Junk
-    remaining_locations: int = total_location_count - len(world.multiworld.worlds[world.player].item_pool)
-    junk_count: int = remaining_locations
-    junk = get_random_item_names(world.random, junk_count, junk_weights)
-    for name in junk:
-        create_single(name, world)
-    world.multiworld.itempool += world.item_pool
-
-
-junk_weights = {
-    f"Random {BOOK}": 50,
-    f"Random {MUSIC}": 50
-}
+    game = GAME_NAME
 
 
 @dataclass(frozen=True)
 class ItemData:
-    code: Optional[int]
-    classification: Optional[ItemClassification]
+    code: int
+    classification: ItemClassification
 
 
-def generate_item_table() -> Dict[str, ItemData]:
+def generate_item_table() -> dict[str, ItemData]:
     item_table = {}
-    for album_index in range(10):
-        if album_index == 0:
-            continue
-        else:
-            # Blocks of levels have ids 2, 3, 4, etc up to 10 for the final block of levels
-            item_table[f"Album {album_index + 1}"] = ItemData(album_index + 1, ItemClassification.progression)
 
+    # Album unlocks: Album 2 through Album 10
+    for album_index in range(1, 10):
+        item_table[f"Album {album_index + 1}"] = ItemData(
+            BASE_ID + album_index,
+            ItemClassification.progression
+        )
+
+    # Individual level unlocks
+    for i, level in enumerate(levels):
+        item_table[f"{level} Unlock"] = ItemData(
+            BASE_ID + 100 + i,
+            ItemClassification.progression
+        )
+
+    # Rhythm toys (reserved for later)
     for i, toy in enumerate(levels_dict["toys"]):
-        # Toys have ids 0x100, 0x101, 0x102, 0x103
-        item_table[f"{toy} Toy"] = ItemData(i + 0x100, ItemClassification.filler)
+        item_table[f"{toy} Toy"] = ItemData(
+            BASE_ID + 200 + i,
+            ItemClassification.filler
+        )
 
+    # Endless games (reserved for later)
     for i, endless_game in enumerate(levels_dict["endless"]):
-        # Endless games have ids 0x200, 0x201, 0x202, 0x203
-        item_table[f"Endless Game - {endless_game}"] = ItemData(i + 0x200, ItemClassification.progression)
+        item_table[f"Endless Game - {endless_game}"] = ItemData(
+            BASE_ID + 300 + i,
+            ItemClassification.filler
+        )
 
+    # Extra games (reserved for later)
     for i, extra_game in enumerate(levels_dict["extra"]):
-        # Extra games have ids 0x300, 0x301, 0x302, 0x303
-        item_table[f"Extra Game - {extra_game}"] = ItemData(i + 0x300, ItemClassification.progression)
+        item_table[f"Extra Game - {extra_game}"] = ItemData(
+            BASE_ID + 400 + i,
+            ItemClassification.filler
+        )
 
-    item_table[f"Random {MUSIC}"] = ItemData(0x400, ItemClassification.filler)
-    item_table[f"Random {BOOK}"] = ItemData(0x401, ItemClassification.filler)
+    # Junk items
+    item_table[f"Random {MUSIC}"] = ItemData(
+        BASE_ID + 500,
+        ItemClassification.filler
+    )
+
+    item_table[f"Random {BOOK}"] = ItemData(
+        BASE_ID + 501,
+        ItemClassification.filler
+    )
+
     return item_table
 
 
 rhythm_heaven_fever_item_table = generate_item_table()
+
+
+def get_random_item_names(rand, k: int, weights: dict[str, int]) -> list[str]:
+    return rand.choices(
+        list(weights.keys()),
+        weights=list(weights.values()),
+        k=k
+    )
+
+
+def create_single(
+    name: str,
+    world: RhythmHeavenFeverWorld,
+    item_class: ItemClassification | None = None
+) -> None:
+    item_data = rhythm_heaven_fever_item_table[name]
+
+    classification = (
+        item_data.classification
+        if item_class is None
+        else item_class
+    )
+
+    world.item_pool.append(
+        RhythmHeavenFeverItem(
+            name,
+            classification,
+            item_data.code,
+            world.player
+        )
+    )
+
+
+def create_items(world: RhythmHeavenFeverWorld):
+    total_location_count = len(
+        world.multiworld.get_unfilled_locations(world.player)
+    )
+
+    # Album progression (normal mode)
+    if not world.options.levelsanity.value:
+        for album_index in range(1, world.options.remix_count.value):
+            create_single(f"Album {album_index + 1}", world)
+
+    # Individual level progression (Levelsanity)
+    else:
+        enabled_levels = levels[:world.options.remix_count.value * 5]
+
+        # First five levels are available at the start
+        for level in enabled_levels[5:]:
+            create_single(f"{level} Unlock", world)
+
+    # Junk
+    junk_count = total_location_count - len(world.item_pool)
+
+    if junk_count < 0:
+        raise ValueError(
+            f"Too many items! {len(world.item_pool)} items for "
+            f"{total_location_count} locations."
+        )
+
+    junk_weights = {
+        f"Random {BOOK}": 50,
+        f"Random {MUSIC}": 50
+    }
+
+    junk = get_random_item_names(
+        world.random,
+        junk_count,
+        junk_weights
+    )
+
+    for name in junk:
+        create_single(name, world)
+
+    world.multiworld.itempool += world.item_pool

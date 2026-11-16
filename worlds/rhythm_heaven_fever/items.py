@@ -37,10 +37,17 @@ def create_multiple(name: str, amount: int, world: RhythmHeavenFeverWorld, item_
 def create_items(world: RhythmHeavenFeverWorld):
     total_location_count: int = len(world.multiworld.get_unfilled_locations(world.player))
 
-    for album_index in range(world.options.remix_count):
-        if album_index == 0:
-            continue
-        create_single(f"Album {album_index + 1}", world)
+    if (not world.options.levelsanity.value): # {
+        for album_index in range(world.options.remix_count):
+            if album_index == 0:
+                continue
+            create_single(f"Album {album_index + 1}", world, ItemClassification.progression)
+    else:
+        for remix in levels_dict["core"]: # {
+            create_single(remix, world, ItemClassification.progression)
+            for remixLevel in levels_dict["core"][remix]: # {
+                create_single(remixLevel, world, ItemClassification.progression)
+
 
     if world.options.include_endless.value:
         for endless_game in levels_dict["endless"]:

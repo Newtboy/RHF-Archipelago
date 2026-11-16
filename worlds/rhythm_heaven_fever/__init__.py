@@ -59,7 +59,11 @@ class RhythmHeavenFeverWorld(World):
         return {
             "Required Rank": self.options.required_rank.value,
             "Include Endless": self.options.include_endless.value,
-            "Remix Count": self.options.remix_count.value
+            "Remix Count": self.options.remix_count.value,
+            "Ranksanity": self.options.ranksanity.value,
+            "Ranksanity Cap": self.options.ranksanity_max_cap.value,
+            "Ranksanity Use Remixes": self.options.ranksanity_use_remixes.value,
+            "Levelsanity": self.options.levelsanity.value,
         }
 
     def handle_ut_yamless(self, slot_data: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:

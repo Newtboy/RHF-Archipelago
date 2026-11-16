@@ -68,91 +68,98 @@ KARATE2 = "Karate Man 2"
 REMIX10 = "Remix 10"
 
 levels_dict = {
-    "toys": {
+    "toys": [
         CAR_TOY,
         POLICE_TOY,
         CYMBAL_TOY,
         FIGHTER_TOY
-    },
-    "endless": {
+    ],
+    "endless": [
         UPBEAT,
         WAKE,
         MONK,
         CUPID
-    },
-    "extra": {
+    ],
+    "extra": [
         TRIO,
         SPIRITS,
         CALLIGRAPHY,
         TRIAL,
         NIGHT
-    },
+    ],
     "core": {
-        REMIX1: {
+        REMIX1: [
             GOLF,
             SCREWBOT,
             SEESAW,
             DATE
-        },
-        REMIX2: {
+        ],
+        REMIX2: [
             FORK,
             TAMBOURINE,
             MEETING,
             MONKEY_WATCH
-        },
-        REMIX3: {
+        ],
+        REMIX3: [
             DOUGH,
             BUILT,
             RALLY,
             FIGHTER
-        },
-        REMIX4: {
+        ],
+        REMIX4: [
             RINGSIDE,
             PACKING,
             MICRO,
             SAMURAI
-        },
-        REMIX5: {
+        ],
+        REMIX5: [
             CATCH,
             FLIPPER,
             EXHIBITION,
             FLOCKSTEP
-        },
-        REMIX6: {
+        ],
+        REMIX6: [
             LAUNCH,
             DONK,
             BOSSA,
             RAP
-        },
-        REMIX7: {
+        ],
+        REMIX7: [
             TAP,
             SHRIMP,
             CHEER,
             KARATE
-        },
-        REMIX8: {
+        ],
+        REMIX8: [
             SAMURAI2,
             DOUGH2,
             BUILT2,
             DATE2
-        },
-        REMIX9: {
+        ],
+        REMIX9: [
             RAP2,
             CHEER2,
             GOLF2,
             SCREWBOT2
-        },
-        REMIX10: {
+        ],
+        REMIX10: [
             FIGHTER2,
             MICRO2,
             PACKING2,
             KARATE2
-        },
+        ],
     }
 }
 
+levels = []
+for remix in levels_dict["core"]:  # {
+    levels.append(remix)
 
+    for level in levels_dict["core"][remix]:  # {
+        levels.append(level)
+    # }
 
+# }
 
 
 

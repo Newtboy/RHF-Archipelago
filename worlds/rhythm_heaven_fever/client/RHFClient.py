@@ -43,7 +43,9 @@ class RHFClient(CommonClient.CommonContext):
 				"Make sure Dolphin is running."
 			)
 
-		self.memory_editor = RHFMemoryEditor()
+		# TODO: Ask for slot number
+
+		self.memory_editor = RHFMemoryEditor(slotnum=1)
 		self.game_memory = RHFMemory()
 
 		self.initialize_game_state()
@@ -74,9 +76,6 @@ class RHFClient(CommonClient.CommonContext):
 	async def check_levels(self):
 		gameState = self.memory_editor.getLevelStatesFromGame()
 		previousState = self.game_memory.level_state
-
-
-
 
 	def on_package(self, cmd: str, args: dict):
 		if not dme.is_hooked():
@@ -109,9 +108,8 @@ class RHFClient(CommonClient.CommonContext):
 		if self.game_memory is None:
 			return
 		# }
-		if (item[0:5] == "Album"): # {
-			# We can assume that we aren't using levelsanity as the Album item should not be made with it on
-			self.memory_editor.unlockAlbum(item[-2:].strip())
+		if ((item.item in worlds.rhythm_heaven_fever.ALBUM_ITEM_IDS)): # {
+			self.memory_editor.unlockAlbum(item.item[-2:].strip())
 
 
 	# Location detection methods go here.

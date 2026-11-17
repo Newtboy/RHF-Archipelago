@@ -1,8 +1,5 @@
-import copy
-import typing
 from typing import *
 from BaseClasses import Item, MultiWorld, Tutorial, ItemClassification, Region, Location, LocationProgressType
-from Options import OptionError, Accessibility
 from worlds.AutoWorld import WebWorld, World
 from .items import *
 from .locations import *

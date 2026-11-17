@@ -2,7 +2,6 @@ import asyncio
 
 from kvui import GameManager
 
-
 class RHFManager(GameManager):
 
     logging_pairs = [

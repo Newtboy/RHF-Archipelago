@@ -17,6 +17,7 @@ class RHFClient(CommonClient.CommonContext):
 	def __init__(self, server_address, password):
 		super().__init__(server_address, password)
 
+		self.memory_editor = None
 		self.game_memory = None
 		self.game_watcher_task = None
 

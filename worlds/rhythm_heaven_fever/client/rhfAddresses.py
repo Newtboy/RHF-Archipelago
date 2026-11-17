@@ -22,12 +22,10 @@ class Address: # {
 
 		startAddr = self.slot_starts[self.slot]
 
-
-
 		self.colCountAddr = startAddr + 0x09
 		self.lastPlayedLevelAddr = startAddr + 0x0a
 
-		self.levelStatusDictToAddri = {
+		self.levelStatusDictToAddri: dict[str,int] = {
 			levelName: startAddr + i
 			for levelName, i in zip(self.levels, range(0x0b, 0x3c))
 		}

@@ -88,7 +88,6 @@ def get_regions(world: RhythmHeavenFeverWorld):
 
 
 def validate_regions(regions):
-
     assigned = Counter(
         location_name
         for location_names in regions.values()

@@ -9,7 +9,7 @@ import worlds.rhythm_heaven_fever
 from worlds.rhythm_heaven_fever.client.RHFMemory import RHFMemoryEditor, RHFMemory
 
 
-class LevelCompletion(Enum):
+class LevelCompletion(enum.IntEnum):
 	NOTRECEIVED = 0
 	TRYAGAIN = 1
 	OK = 2
@@ -75,7 +75,33 @@ class RHFClient(CommonClient.CommonContext):
 
 	async def check_levels(self):
 		gameState = self.memory_editor.getLevelStatesFromGame()
-		previousState = self.game_memory.level_state
+		for level in worlds.rhythm_heaven_fever.levels: # {
+			highRank = self.game_memory.level_state[level]["highest_rank"]
+			if (not self.ranksanity): # {
+				if (highRank != gameState[level] and highRank > self.requiredRank): # {
+					await self.sendLevelCheck(level)
+			else:
+				if (highRank > gameState[level] and highRank < self.ranksanityCap): # {
+
+
+	async def sendLevelCheck(self, name:str):
+		location_name = name
+		location_id = worlds.rhythm_heaven_fever.BASE_LEVEL_IDS[location_name]
+
+		await self.send_msgs([{
+			"cmd": "LocationChecks",
+			"locations": [location_id],
+		}])
+
+	async def sendRanksanityCheck(self, name:str):
+		location_name = name
+		location_id = worlds.rhythm_heaven_fever.RANKSANITY_LOCATION_IDS[location_name]
+
+		await self.send_msgs([{
+			"cmd": "LocationChecks",
+			"locations": [location_id],
+		}])
+
 
 	def on_package(self, cmd: str, args: dict):
 		if not dme.is_hooked():
@@ -108,9 +134,17 @@ class RHFClient(CommonClient.CommonContext):
 		if self.game_memory is None:
 			return
 		# }
-		if ((item.item in worlds.rhythm_heaven_fever.ALBUM_ITEM_IDS)): # {
-			self.memory_editor.unlockAlbum(item.item[-2:].strip())
-
+		if (not self.levelsanity): # {
+			for name, id in worlds.rhythm_heaven_fever.ALBUM_ITEM_IDS.items(): # {
+				if (item.item == id): # {
+					nameNum = name.removeprefix("Album ")
+					self.game_memory.level_state[name]["ap_received"] = True
+					self.memory_editor.unlockAlbum(int(nameNum))
+		else:
+			for name, id in worlds.rhythm_heaven_fever.LEVEL_ITEM_IDS.items(): # {
+				if (item.item == id): # {
+					self.game_memory.level_state[name]["ap_received"] = True
+					self.memory_editor.unlockLevel(name)
 
 	# Location detection methods go here.
 	# Item application methods go here.

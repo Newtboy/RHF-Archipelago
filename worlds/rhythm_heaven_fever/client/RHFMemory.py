@@ -9,7 +9,7 @@ from worlds.rhythm_heaven_fever.client.RHFClient import LevelCompletion
 
 class RHFMemoryEditor: # {
 	def __init__(self, slotnum):
-		addresses = Address(slotNum=slotnum)
+		self.addresses = Address(slotNum=slotnum)
 
 
 	def read_bytes(self, address, size):
@@ -73,21 +73,27 @@ class RHFMemoryEditor: # {
 		for i in range(startAddr, startAddr + 5): # {
 			self.setLevelState(self.addresses.levels[i], LevelCompletion.TRYAGAIN) # TRYAGAIN is the same as unlocked for playing
 
-	def getLevelStatesFromGame(self) -> list[LevelCompletion]:
-		levels = []
-		for i in range(self.addresses.levelStatusDictToAddri): # {
+	def unlockLevel(self, levelName):
+		self.write_u8(self.addresses.levelStatusDictToAddri[levelName], 0x02)
+
+	def lockLevel(self, levelName):
+		self.write_u8(self.addresses.levelStatusDictToAddri[levelName], 0x01)
+
+	def getLevelStatesFromGame(self) -> dict[str,LevelCompletion]:
+		levels: dict[str,LevelCompletion] = []
+		for i, (name, memAddr) in enumerate(self.addresses.levelStatusDictToAddri.items()): # {
 			val = self.read_u8(self.addresses.levelStatusDictToAddri[i])
 			match val: # {
 				case 0x01: # {
-					levels.append(LevelCompletion.NOTRECEIVED)
+					levels[name] = LevelCompletion.NOTRECEIVED
 				case 0x02: # {
-					levels.append(LevelCompletion.TRYAGAIN)
+					levels[name] = LevelCompletion.TRYAGAIN
 				case 0x03: # {
-					levels.append(LevelCompletion.OK)
+					levels[name] = LevelCompletion.OK
 				case 0x04: # {
-					levels.append(LevelCompletion.SUPERB)
+					levels[name] = LevelCompletion.SUPERB
 				case 0x05: # {
-					levels.append(LevelCompletion.PERFECT)
+					levels[name] = LevelCompletion.PERFECT
 		return levels
 
 	def show_all_cols(self):
@@ -95,6 +101,14 @@ class RHFMemoryEditor: # {
 
 
 class RHFMemory: # {
+	def __init__(self, client):
+		self.level_state = {
+			name: {
+				"ap_received": False,
+				"highest_rank": LevelCompletion.NOTATTEMPTED
+			}
+			for name in client.memory_editor.LEVELS
+		}
 	LEVELS = [
 		"Hole in One",
 		"Screwbot Factory",
@@ -148,11 +162,3 @@ class RHFMemory: # {
 		"Karate Man 2",
 		"Remix 10"
 	]
-	def init_level_dat(self, client):
-		self.level_state = {
-			name: {
-				"ap_received": False,
-				"highest_rank": LevelCompletion.NOTATTEMPTED
-			}
-			for name in client.memory_editor.LEVELS
-		}

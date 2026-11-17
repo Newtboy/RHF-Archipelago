@@ -50,6 +50,15 @@ JUNK_ITEM_IDS = {
     f"Random {BOOK}": BASE_ID + 501
 }
 
+ALL_ITEM_TABLE = {
+    **ALBUM_ITEM_IDS,
+    **LEVEL_ITEM_IDS,
+    **TOY_ITEM_IDS,
+    **ENDLESS_ITEM_IDS,
+    **EXTRA_ITEM_IDS,
+    **JUNK_ITEM_IDS
+}
+
 
 # Item Classifications
 ALBUM_ITEM_CLASSIFICATION = ItemClassification.progression

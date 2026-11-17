@@ -19,6 +19,7 @@ class RhythmHeavenFeverWeb(WebWorld):
         "A guide to setting up the Rhythm Heaven Fever randomizer connected to an Archipelago Multiworld.",
         "English",
         "setup_en.md",
+
         "setup/en",
         ["CallMeZero", "xMcacutt", "Beble"]
     )
@@ -36,13 +37,11 @@ class RhythmHeavenFeverWorld(World):
     options_dataclass = RhythmHeavenFeverOptions
     options: RhythmHeavenFeverOptions
     topology_present = True
-    item_name_to_id = {name: item.code for name, item in rhythm_heaven_fever_item_table.items()}
+    item_name_to_id = {**ALL_ITEM_TABLE}
     # location_name_to_id = {name: item.code for name, item in rhythm_heaven_fever_location_table.items()}
     location_name_to_id = {
         **ALL_LOCATION_TABLE
     }
-    if (options.levelsanity.value): # {
-        pass
 
     web = RhythmHeavenFeverWeb()
 
@@ -63,10 +62,7 @@ class RhythmHeavenFeverWorld(World):
         }
 
     def get_filler_item_name(self) -> str:
-        return get_random_item_names(self.random, 1, junk_weights)[0]
-
-    def generate_early(self) -> None:
-        self.handle_ut_yamless(None)
+        return get_random_item_names(self.random, 1)[0]
 
     def create_item(self, name: str) -> Item:
         item_info = rhythm_heaven_fever_item_table[name]

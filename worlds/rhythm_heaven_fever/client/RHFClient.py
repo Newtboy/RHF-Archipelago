@@ -82,6 +82,7 @@ class RHFClient(CommonClient.CommonContext):
 					await self.sendLevelCheck(level)
 			else:
 				if (highRank > gameState[level] and highRank < self.ranksanityCap): # {
+					await self.sendRanksanityCheck(level)
 
 
 	async def sendLevelCheck(self, name:str):
@@ -111,8 +112,8 @@ class RHFClient(CommonClient.CommonContext):
 
 		if cmd == "Connected":
 			self.ranksanity = args["slot_data"]["Ranksanity"]
-			self.ranksanityCap = args["slot_data"]["Ranksanity Cap"]
-			self.ranksanityRemixes = args["slot_data"]["Ranksanity Use Remixes"]
+			self.ranksanityCap = LevelCompletion(args["slot_data"]["Ranksanity Cap"])
+			self.ranksanityRemixes = LevelCompletion(args["slot_data"]["Ranksanity Use Remixes"])
 			self.levelsanity = args["slot_data"]["Levelsanity"]
 			if (not self.ranksanity): # {
 				# Don't bother making this if ranksanity is enabled, bugs show up nicer if it crashes :)

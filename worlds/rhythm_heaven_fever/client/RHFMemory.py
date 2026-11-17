@@ -80,7 +80,7 @@ class RHFMemoryEditor: # {
 		self.write_u8(self.addresses.levelStatusDictToAddri[levelName], 0x01)
 
 	def getLevelStatesFromGame(self) -> dict[str,LevelCompletion]:
-		levels: dict[str,LevelCompletion] = []
+		levels: dict[str,LevelCompletion] = {}
 		for i, (name, memAddr) in enumerate(self.addresses.levelStatusDictToAddri.items()): # {
 			val = self.read_u8(self.addresses.levelStatusDictToAddri[i])
 			match val: # {

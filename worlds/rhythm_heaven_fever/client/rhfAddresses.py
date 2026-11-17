@@ -27,7 +27,7 @@ class Address: # {
 
 		self.levelStatusDictToAddri: dict[str,int] = {
 			levelName: startAddr + i
-			for levelName, i in zip(self.levels, range(0x0b, 0x3c))
+			for levelName, i in zip(self.levels, range(0x0b, 0x3d)) #3d not 3c because it's [) FUCKING PIECE OF SHIT
 		}
 
 		self.loadLeftmostColAddr = startAddr + 0x3d

@@ -2,14 +2,13 @@ import pickletools
 
 import dolphin_memory_engine as dme
 
-import worlds.rhythm_heaven_fever.client.RHFClient
 from worlds.rhythm_heaven_fever.client.rhfAddresses import Address
-from worlds.rhythm_heaven_fever.client.RHFClient import LevelCompletion
-
+from worlds.rhythm_heaven_fever.client.RHFEnums import LevelCompletion
 
 class RHFMemoryEditor: # {
 	def __init__(self, slotnum):
 		self.addresses = Address(slotNum=slotnum)
+		self.last_status = {}
 
 
 	def read_bytes(self, address, size):
@@ -68,32 +67,60 @@ class RHFMemoryEditor: # {
 				val = 0x05
 		self.write_u8(self.addresses.levelStatusDictToAddri[level], val)
 
-	def unlockAlbum(self, albumNum):
-		startAddr = self.addresses.levelStatusDictToAddri.values()[5 * albumNum]
-		for i in range(startAddr, startAddr + 5): # {
-			self.setLevelState(self.addresses.levels[i], LevelCompletion.TRYAGAIN) # TRYAGAIN is the same as unlocked for playing
 
 	def unlockLevel(self, levelName):
-		self.write_u8(self.addresses.levelStatusDictToAddri[levelName], 0x02)
+		address = self.addresses.levelStatusDictToAddri[levelName]
+		current_status = self.read_u8(address)
+
+		# Unlock without overwriting existing completion ranks.
+		if current_status in (0x00, 0x01):
+			self.write_u8(address, 0x02)
 
 	def lockLevel(self, levelName):
-		self.write_u8(self.addresses.levelStatusDictToAddri[levelName], 0x01)
+		address = self.addresses.levelStatusDictToAddri[levelName]
+		current_status = self.read_u8(address)
 
-	def getLevelStatesFromGame(self) -> dict[str,LevelCompletion]:
-		levels: dict[str,LevelCompletion] = {}
-		for i, (name, memAddr) in enumerate(self.addresses.levelStatusDictToAddri.items()): # {
-			val = self.read_u8(self.addresses.levelStatusDictToAddri[i])
-			match val: # {
-				case 0x01: # {
+		# Lock without overwriting existing completion ranks.
+		if current_status in (0x00, 0x02):
+			self.write_u8(address, 0x01)
+
+	def unlockAlbum(self, albumNum):
+		startIndex = 5 * (albumNum - 1)
+
+		for level in self.addresses.levels[startIndex:startIndex + 5]:
+			self.unlockLevel(level)
+
+	def getLevelStatesFromGame(self) -> dict[str, LevelCompletion]:
+		levels: dict[str, LevelCompletion] = {}
+
+		for name, memAddr in self.addresses.levelStatusDictToAddri.items():
+			val = self.read_u8(memAddr)
+
+			# Print only when a memory value changes.
+			if self.last_status.get(name) != val:
+				print(
+					f"[RHF Memory] {name}: "
+					f"0x{memAddr:08X} = 0x{val:02X}"
+				)
+				self.last_status[name] = val
+
+			match val:
+				case 0x01:
 					levels[name] = LevelCompletion.NOTRECEIVED
-				case 0x02: # {
+				case 0x02:
 					levels[name] = LevelCompletion.TRYAGAIN
-				case 0x03: # {
+				case 0x03:
 					levels[name] = LevelCompletion.OK
-				case 0x04: # {
+				case 0x04:
 					levels[name] = LevelCompletion.SUPERB
-				case 0x05: # {
+				case 0x05:
 					levels[name] = LevelCompletion.PERFECT
+				case _:
+					print(
+						f"[RHF WARNING] Unknown status "
+						f"0x{val:02X} for {name}"
+					)
+
 		return levels
 
 	def show_all_cols(self):
@@ -105,10 +132,11 @@ class RHFMemory: # {
 		self.level_state = {
 			name: {
 				"ap_received": False,
-				"highest_rank": LevelCompletion.NOTATTEMPTED
+				"highest_rank": LevelCompletion.NOTRECEIVED
 			}
-			for name in client.memory_editor.LEVELS
+			for name in self.LEVELS
 		}
+
 	LEVELS = [
 		"Hole in One",
 		"Screwbot Factory",

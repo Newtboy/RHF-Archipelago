@@ -4,6 +4,7 @@ from BaseClasses import Location
 from .data import levels, levels_dict
 
 
+
 GAME_NAME = "Rhythm Heaven Fever"
 BASE_ID = 0x52484600
 

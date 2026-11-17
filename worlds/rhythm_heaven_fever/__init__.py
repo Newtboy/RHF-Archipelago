@@ -49,6 +49,7 @@ class RhythmHeavenFeverWorld(World):
         super().__init__(multiworld, player)
         self.item_pool = []
 
+
     def fill_slot_data(self) -> Mapping[str, Any]:
         #self.generate_puml()
         return {
@@ -62,22 +63,76 @@ class RhythmHeavenFeverWorld(World):
         }
 
     def get_filler_item_name(self) -> str:
-        return get_random_item_names(self.random, 1)[0]
+        return self.random.choice(list(JUNK_ITEM_IDS))
 
     def create_item(self, name: str) -> Item:
-        item_info = rhythm_heaven_fever_item_table[name]
-        return RhythmHeavenFeverItem(name, item_info.classification, item_info.code, self.player)
+        if name in ALBUM_ITEM_IDS or name in LEVEL_ITEM_IDS:
+            classification = ItemClassification.progression
+        else:
+            classification = ItemClassification.filler
 
-    def create_items(self):
-        create_items(self)
+        return RhythmHeavenFeverItem(
+            name,
+            classification,
+            ALL_ITEM_TABLE[name],
+            self.player
+        )
+
+    def create_items(self) -> None:
+        self.create_item_pool()
+
+    def create_item_pool(self) -> None:
+        item_pool = []
+        # Albums
+        if (not self.options.levelsanity): # {
+            for item in ALBUM_ITEM_IDS:
+                item_pool.append(self.create_item(item))
+        else:
+            for item in LEVEL_ITEM_IDS:
+                item_pool.append(self.create_item(item))
+
+        # Fill remaining locations with junk
+        total_locations = len(self.multiworld.get_unfilled_locations(self.player))
+        remaining = total_locations - len(item_pool)
+
+        for _ in range(remaining):
+            item_pool.append(self.create_item(self.get_filler_item_name()))
+
+        self.multiworld.itempool += item_pool
 
     # The part that ACTUALLY creates locations
     def create_regions(self):
         create_regions(self)
 
     def set_rules(self):
-        for extra_game in levels_dict["extra"]:
-            loc = self.get_location(f"{extra_game}")
-            loc.access_rule = lambda state, game=extra_game: state.has(f"Extra Game - {extra_game}", self.player)
-        self.multiworld.completion_condition[self.player] \
-            = lambda state: state.can_reach_location(f"Remix {self.options.remix_count}", self.player)
+        rules.set_rules(self)
+
+# =================================================================
+# Launcher
+# =================================================================
+
+from worlds.LauncherComponents import (
+    Component,
+    components,
+    Type,
+    launch,
+)
+
+
+def launch_rhf_client(*args):
+    from .client.launcher import run_client
+
+    launch(
+        run_client,
+        name="Rhythm Heaven Fever Client",
+        args=args,
+    )
+
+
+components.append(
+    Component(
+        "Rhythm Heaven Fever Client",
+        func=launch_rhf_client,
+        component_type=Type.CLIENT,
+    )
+)

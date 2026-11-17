@@ -154,12 +154,11 @@ levels_dict = {
 levels = []
 levelsNoRemixes = []
 for remix in levels_dict["core"]:  # {
-    levels.append(remix)
     for level in levels_dict["core"][remix]:  # {
         levels.append(level)
         levelsNoRemixes.append(level)
     # }
-
+    levels.append(remix)
 # }
 
 

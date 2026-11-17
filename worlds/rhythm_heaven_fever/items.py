@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import worlds.rhythm_heaven_fever
 from BaseClasses import Item, ItemClassification
 
 from .data import levels, levels_dict, BOOK, MUSIC
@@ -17,7 +18,7 @@ class RhythmHeavenFeverItem(Item):
 # Albums
 ALBUM_ITEM_IDS = {
     f"Album {i + 1}": BASE_ID + i
-    for i in range(2, 11)
+    for i in range(1, 10)
 }
 
 # Individual Levels

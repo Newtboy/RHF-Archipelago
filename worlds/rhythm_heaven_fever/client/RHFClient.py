@@ -259,18 +259,5 @@ class RHFClient(CommonClient.CommonContext):
 
 					return
 
-	def run_gui(self):
-		"""Import kivy UI system and start running it as self.ui_task."""
-		from kvui import GameManager
-
-		class RHFManager(GameManager):
-			logging_pairs = [
-				("Client", "Archipelago")
-			]
-			base_title = "Archipelago Rhythm Heaven Fever Client"
-
-		self.ui = RHFManager(self)
-		self.ui_task = asyncio.create_task(self.ui.async_run(), name="UI")
-
 # Location detection methods go here.
 # Item application methods go here.

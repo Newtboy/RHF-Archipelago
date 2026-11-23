@@ -24,9 +24,9 @@ if TYPE_CHECKING:
 # -------------------------------------------------------
 
 menu = (
-		list(EXTRA_LEVELS_IDS)
-		+ list(ENDLESS_LEVELS_IDS)
-		+ list(TOYS_LEVELS_IDS)
+		# list(EXTRA_LEVELS_IDS)
+		# + list(ENDLESS_LEVELS_IDS)
+		# + list(TOYS_LEVELS_IDS)
 )
 
 

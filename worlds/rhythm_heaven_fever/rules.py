@@ -1,10 +1,11 @@
 import typing
 
-import rule_builder.rules
+from rule_builder.rules import True_, Has, HasAllCounts
 
 from . import data
 if (typing.TYPE_CHECKING): # {
 	from . import RhythmHeavenFeverWorld
+
 
 def set_rules(world: "RhythmHeavenFeverWorld"):
 	player = world.player
@@ -25,22 +26,24 @@ def set_rules(world: "RhythmHeavenFeverWorld"):
 
 	# LEVELSANITY
 	if world.options.levelsanity.value:
-		selected_levels = data.levels[:world.options.remix_count.value * 5]
+		selected_levels = data.levels
 
-		for level in selected_levels:
-			rule = rule_builder.rules.HasAllCounts(
-				{f"{level} Unlock": 1}
-			).resolve(world)
+		for index, level in enumerate(selected_levels): # {
+			if (index < 5): # {
+				continue
+			# }
+			else: # {
+				rule = Has("{level} Unlock")
 
-			world.multiworld.get_location(
-				level, player
-			).access_rule = rule
-
+				world.multiworld.get_location(
+					level, player
+				).access_rule = rule.resolve(world)
+			# }
 			if world.options.ranksanity.value:
 				for rank in ranks:
 					world.multiworld.get_location(
 						f"{level}: {rank}", player
-					).access_rule = rule
+					).access_rule = (rule if world.options.ranksanity_use_remixes.value else True_()).resolve(world)
 
 	# ALBUM PROGRESSION
 	else:
@@ -48,7 +51,7 @@ def set_rules(world: "RhythmHeavenFeverWorld"):
 			if album_index == 0:
 				continue
 
-			rule = rule_builder.rules.HasAllCounts(
+			rule = HasAllCounts(
 				{f"Album {album_index + 1}": 1}
 			).resolve(world)
 

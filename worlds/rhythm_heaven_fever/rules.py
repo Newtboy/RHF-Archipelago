@@ -1,5 +1,6 @@
 import typing
 
+from .locations import ALL_LOCATION_TABLE
 from rule_builder.rules import True_, Has, HasAllCounts
 
 from . import data
@@ -14,9 +15,7 @@ def set_rules(world: "RhythmHeavenFeverWorld"):
 	ranks = RANKS[:world.options.ranksanity_max_cap.value]
 
 	# SELECTED LEVELS
-	selected_albums = list(data.levels_dict["core"].items())[
-		:world.options.remix_count.value
-	]
+	selected_albums = list(data.levels_dict["core"].items())
 
 	selected_levels = [
 		level
@@ -28,22 +27,21 @@ def set_rules(world: "RhythmHeavenFeverWorld"):
 	if world.options.levelsanity.value:
 		selected_levels = data.levels
 
-		for index, level in enumerate(selected_levels): # {
-			if (index < 5): # {
-				continue
-			# }
-			else: # {
-				rule = Has("{level} Unlock")
+		for index, level in enumerate(selected_levels):
+			is_remix = level in data.levels_dict["core"]
 
-				world.multiworld.get_location(
-					level, player
-				).access_rule = rule.resolve(world)
-			# }
-			if world.options.ranksanity.value:
+			if index < 5:
+				rule = True_()
+			else:
+				rule = Has(f"{level} Unlock")
+
+			world.multiworld.get_location(
+				level, player
+			).access_rule = rule.resolve(world)
+
+			if world.options.ranksanity.value and (not is_remix or world.options.ranksanity_use_remixes.value):
 				for rank in ranks:
-					world.multiworld.get_location(
-						f"{level}: {rank}", player
-					).access_rule = (rule if world.options.ranksanity_use_remixes.value else True_()).resolve(world)
+					world.multiworld.get_location(f"{level}: {rank}", player).access_rule = rule.resolve(world)
 
 	# ALBUM PROGRESSION
 	else:
@@ -59,26 +57,66 @@ def set_rules(world: "RhythmHeavenFeverWorld"):
 				world.multiworld.get_location(
 					level, player
 			).access_rule = rule
+
 	# GOAL
-	required_rank_locations = []
+	required_rank = RANKS[
+		min(
+			world.options.required_rank.value,
+			world.options.ranksanity_max_cap.value - 1
+		)
+	]
 
 	if world.options.ranksanity.value:
-		required_rank = ranks[-1]
-
-		for level in selected_levels:
-			is_remix = level in data.levels_dict["core"]
-
-			if is_remix and not world.options.ranksanity_use_remixes.value:
-				continue
-
-			required_rank_locations.append(
-				f"{level}: {required_rank}"
-			)
-
-	else:
-		required_rank = RANKS[world.options.required_rank.value]
-
-		required_rank_locations = [
-			f"{level}: {required_rank}"
-			for level in selected_levels
+		goal_locations = [
+			location_name
+			for location_name in ALL_LOCATION_TABLE
+			if location_name.endswith(f": {required_rank}")
+			   and (
+					   world.options.ranksanity_use_remixes.value
+					   or location_name.rsplit(": ", 1)[0]
+					   not in data.levels_dict["core"]
+			   )
 		]
+	else:
+		goal_locations = selected_levels.copy()
+
+	# Exclude free content from the goal.
+	if world.options.levelsanity.value:
+		goal_locations = [
+			location_name
+			for location_name in goal_locations
+			if selected_levels.index(
+				location_name.split(": ", 1)[0]
+			) >= 5
+		]
+	else:
+		goal_locations = [
+			location_name
+			for location_name in goal_locations
+			if location_name not in data.levels_dict["core"].get(
+				list(data.levels_dict["core"])[0], []
+			)
+			   and location_name != list(data.levels_dict["core"])[0]
+		]
+
+	needed = min(
+		world.options.remix_count.value*5,
+		len(goal_locations)
+	)
+	# DEBUG: Verify goal locations exist.
+	for location_name in goal_locations:
+		try:
+			world.multiworld.get_location(location_name, player)
+		except KeyError:
+			print(
+				f"MISSING GOAL LOCATION: {location_name} "
+				f"(Ranksanity={world.options.ranksanity.value}, "
+				f"Remixes={world.options.ranksanity_use_remixes.value}, "
+				f"Levelsanity={world.options.levelsanity.value})"
+			)
+	world.multiworld.completion_condition[player] = (
+		lambda state: sum(
+			state.can_reach_location(location_name, player)
+			for location_name in goal_locations
+		) >= needed
+	)

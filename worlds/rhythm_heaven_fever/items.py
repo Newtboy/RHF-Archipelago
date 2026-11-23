@@ -59,7 +59,6 @@ ALL_ITEM_TABLE = {
     **JUNK_ITEM_IDS
 }
 
-
 # Item Classifications
 ALBUM_ITEM_CLASSIFICATION = ItemClassification.progression
 LEVEL_ITEM_CLASSIFICATION = ItemClassification.progression

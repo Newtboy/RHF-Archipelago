@@ -27,6 +27,7 @@ menu = (
 		# list(EXTRA_LEVELS_IDS)
 		# + list(ENDLESS_LEVELS_IDS)
 		# + list(TOYS_LEVELS_IDS)
+	list()
 )
 
 
@@ -39,10 +40,7 @@ def get_regions(world: RhythmHeavenFeverWorld):
 		"Menu": menu.copy(),
 	}
 
-	# Determine which albums are enabled.
-	selected_albums = list(levels_dict["core"].items())[
-		:world.options.remix_count.value
-	]
+	selected_albums = list(levels_dict["core"].items())
 
 	# Determine which Ranksanity ranks are enabled.
 	if world.options.ranksanity.value:
@@ -54,21 +52,16 @@ def get_regions(world: RhythmHeavenFeverWorld):
 	# -------------------------------------------------------
 	# LEVELSANITY
 	# -------------------------------------------------------
-
 	if world.options.levelsanity.value:
-		selected_levels = levels[
-			:world.options.remix_count.value * 5
-		]
-
-		for level_name in selected_levels:
-
+		for level_name in levels:
 			regions[level_name] = [level_name]
+
 			is_remix = level_name in levels_dict["core"]
 
 			# Add Ranksanity locations.
 			if enabled_ranks and (
-					not is_remix
-					or world.options.ranksanity_use_remixes.value
+				not is_remix
+				or world.options.ranksanity_use_remixes.value
 			):
 				regions[level_name].extend(
 					f"{level_name}: {rank}"
@@ -78,30 +71,32 @@ def get_regions(world: RhythmHeavenFeverWorld):
 	# -------------------------------------------------------
 	# NORMAL ALBUM MODE
 	# -------------------------------------------------------
-
 	else:
 		for album_index, (remix, album_levels) in enumerate(
-				selected_albums
+			selected_albums
 		):
-
-			region_name = f"Album {album_index + 1}"
+			album_name = f"Album {album_index + 1}"
 			level_names = [remix, *album_levels]
-			regions[region_name] = level_names.copy()
+
+			regions[album_name] = level_names.copy()
 
 			# Add Ranksanity locations.
 			if enabled_ranks:
 				for level_name in level_names:
 					is_remix = level_name == remix
-					if (is_remix and not world.options.ranksanity_use_remixes.value):
+
+					if (
+						is_remix
+						and not world.options.ranksanity_use_remixes.value
+					):
 						continue
 
-					regions[region_name].extend(
+					regions[album_name].extend(
 						f"{level_name}: {rank}"
 						for rank in enabled_ranks
 					)
 
 	return regions
-
 
 # -------------------------------------------------------
 # VALIDATION
@@ -158,9 +153,7 @@ def create_regions(world: RhythmHeavenFeverWorld):
 	# LEVELSANITY
 	if world.options.levelsanity.value:
 
-		selected_levels = levels[
-			:world.options.remix_count.value * 5
-		]
+		selected_levels = levels
 
 		for level_index, level_name in enumerate(selected_levels):
 
@@ -179,9 +172,9 @@ def create_regions(world: RhythmHeavenFeverWorld):
 
 	# NORMAL ALBUM MODE
 	else:
-
-		for album_index in range(world.options.remix_count.value):
-
+		for album_index, (remix, album_levels) in enumerate(
+				levels_dict["core"].items()
+		):
 			album_name = f"Album {album_index + 1}"
 
 			entrance = connect_regions(

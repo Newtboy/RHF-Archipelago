@@ -81,7 +81,7 @@ class RhythmHeavenFeverWorld(World):
     def create_item_pool(self) -> None:
         item_pool = []
         # Albums
-        if (not self.options.levelsanity): # {
+        if (not self.options.levelsanity.value): # {
             for item in ALBUM_ITEM_IDS:
                 item_pool.append(self.create_item(item))
         else:

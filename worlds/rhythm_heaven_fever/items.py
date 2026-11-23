@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import worlds.rhythm_heaven_fever
 from BaseClasses import Item, ItemClassification
 
 from .data import levels, levels_dict, BOOK, MUSIC

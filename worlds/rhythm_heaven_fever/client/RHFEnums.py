@@ -1,6 +1,5 @@
 import enum
 
-
 class LevelCompletion(enum.IntEnum):
     NOTRECEIVED = 0
     TRYAGAIN = 1

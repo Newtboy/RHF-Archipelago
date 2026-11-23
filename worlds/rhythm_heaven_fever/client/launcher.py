@@ -7,11 +7,6 @@ from CommonClient import (
 
 from .RHFClient import RHFClient
 
-
-# =================================================================
-# Client startup
-# =================================================================
-
 def run_client(*launcher_args):
 
     parser = get_base_parser(

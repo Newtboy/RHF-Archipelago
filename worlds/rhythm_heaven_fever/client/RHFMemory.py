@@ -1,5 +1,3 @@
-import pickletools
-
 import dolphin_memory_engine as dme
 
 from worlds.rhythm_heaven_fever.client.rhfAddresses import Address

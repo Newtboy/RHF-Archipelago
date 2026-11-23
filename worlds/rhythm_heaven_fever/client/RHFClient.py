@@ -17,6 +17,7 @@ class RHFClient(CommonClient.CommonContext):
 	def __init__(self, server_address, password):
 		super().__init__(server_address, password)
 
+		self.memory_editor = None
 		self.game_memory = None
 		self.game_watcher_task = None
 
@@ -257,6 +258,19 @@ class RHFClient(CommonClient.CommonContext):
 					self.memory_editor.unlockLevel(level_name)
 
 					return
+
+	def run_gui(self):
+		"""Import kivy UI system and start running it as self.ui_task."""
+		from kvui import GameManager
+
+		class RHFManager(GameManager):
+			logging_pairs = [
+				("Client", "Archipelago")
+			]
+			base_title = "Archipelago Rhythm Heaven Fever Client"
+
+		self.ui = RHFManager(self)
+		self.ui_task = asyncio.create_task(self.ui.async_run(), name="UI")
 
 # Location detection methods go here.
 # Item application methods go here.

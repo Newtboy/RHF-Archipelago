@@ -88,6 +88,10 @@ class RHFMemoryEditor: # {
 		for level in self.addresses.levels[startIndex:startIndex + 5]:
 			self.unlockLevel(level)
 
+	def getLastPlayedLevel(self):
+		"""Returns rough absolute level, should be 0 upon completing monkey watch"""
+		return (self.read_u8(self.addresses.lastPlayedLevelAddr) - 5)
+
 	def getLevelStatesFromGame(self) -> dict[str, LevelCompletion]:
 		levels: dict[str, LevelCompletion] = {}
 

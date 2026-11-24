@@ -90,7 +90,7 @@ class RHFClient(CommonClient.CommonContext):
 	async def check_levels(self):
 		gameState = self.memory_editor.getLevelStatesFromGame()
 
-		for level in worlds.rhythm_heaven_fever.levels:
+		for i, level in enumerate(worlds.rhythm_heaven_fever.levels):
 			if level not in gameState:
 				continue
 
@@ -98,11 +98,6 @@ class RHFClient(CommonClient.CommonContext):
 			previous_rank = self.game_memory.level_state[level]["highest_rank"]
 
 			if achieved_rank > previous_rank:
-				print(
-					f"[RHF Rank] {level}: "
-					f"{previous_rank.name} -> {achieved_rank.name}"
-				)
-
 				self.game_memory.level_state[level]["highest_rank"] = achieved_rank
 
 				self.update_next_level(level)
@@ -121,6 +116,8 @@ class RHFClient(CommonClient.CommonContext):
 					await self.sendLevelCheck(level)
 
 			else:
+				if (self.memory_editor.getLastPlayedLevel() == i): # {
+					await self.sendLevelCheck(level)
 				await self.check_ranksanity(
 					level,
 					achieved_rank
@@ -147,8 +144,6 @@ class RHFClient(CommonClient.CommonContext):
 
 		if location_id in self.sent_locations:
 			return
-
-		print(f"[RHF Check] Sending: {name}")
 
 		await self.send_msgs([{
 			"cmd": "LocationChecks",
